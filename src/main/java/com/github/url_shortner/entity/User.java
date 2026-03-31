@@ -21,8 +21,8 @@ public class User {
     private int id;
 
 
-    @Column
-    private String user_name;
+    @Column(name = "user_name")
+    private String username;
 
     @Column(unique = true , nullable = false)
     private String email;
