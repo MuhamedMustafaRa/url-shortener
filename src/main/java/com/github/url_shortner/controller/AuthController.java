@@ -1,8 +1,11 @@
 package com.github.url_shortner.controller;
 
 
+import com.github.url_shortner.dto.LoginRequest;
+import com.github.url_shortner.dto.AuthResponse;
 import com.github.url_shortner.dto.RegisterRequest;
 import com.github.url_shortner.service.AuthService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,5 +26,12 @@ public class AuthController {
     public String register(@RequestBody RegisterRequest request){
         authService.register(request);
         return "User registered successfully";
+    }
+
+    @PostMapping("/login")
+    public AuthResponse login(@RequestBody LoginRequest request) {
+        String token = authService.login(request);
+        AuthResponse response = new AuthResponse(token);
+        return response;
     }
 }

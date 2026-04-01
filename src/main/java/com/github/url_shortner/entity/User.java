@@ -1,3 +1,4 @@
+
 package com.github.url_shortner.entity;
 
 
