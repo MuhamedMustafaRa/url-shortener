@@ -1,4 +1,4 @@
-package com.github.url_shortner.config;
+package com.github.url_shortner.security;
 
 import com.github.url_shortner.security.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
@@ -27,6 +27,8 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/{shortCode}").permitAll()
+                        .requestMatchers("/links/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
