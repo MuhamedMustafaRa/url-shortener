@@ -1,5 +1,6 @@
 package com.github.url_shortner.controller;
 
+import com.github.url_shortner.dto.LinkStateResponse;
 import com.github.url_shortner.dto.ShortLinkResponse;
 import com.github.url_shortner.entity.ShortLink;
 import com.github.url_shortner.service.ShortLinkService;
@@ -32,6 +33,16 @@ public class ShortLinkController {
         String username = authentication.getName();
         shortLinkService.deleteLink(link , username);
         return "Link deleted successfully.";
+    }
+
+    @GetMapping("/{id}/stats")
+    public ResponseEntity<LinkStateResponse> getStats(
+            @PathVariable int id,
+            Authentication authentication) {
+
+        String username = authentication.getName();
+
+        return ResponseEntity.ok(shortLinkService.getStats(id, username));
     }
 
     @GetMapping("/all")

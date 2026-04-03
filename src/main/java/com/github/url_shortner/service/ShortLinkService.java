@@ -1,9 +1,12 @@
 package com.github.url_shortner.service;
 
 
+import com.github.url_shortner.dto.LinkStateResponse;
 import com.github.url_shortner.dto.ShortLinkResponse;
+import com.github.url_shortner.entity.Click;
 import com.github.url_shortner.entity.ShortLink;
 import com.github.url_shortner.entity.User;
+import com.github.url_shortner.repository.ClickRepository;
 import com.github.url_shortner.repository.ShortLinkRepository;
 import com.github.url_shortner.repository.UserRepository;
 import lombok.AllArgsConstructor;
@@ -23,6 +26,7 @@ public class ShortLinkService {
 
     private final ShortLinkRepository shortLinkRepository;
     private final UserRepository userRepository;
+    private final ClickRepository clickRepository;
 
     private final String BASE_URL = "http://localhost:8080/";
 
@@ -63,11 +67,42 @@ public class ShortLinkService {
             throw new RuntimeException("Link expired");
         }
 
+        Click click = new Click();
+        click.setShortLink(shortLink);
+        click.setTimestamp(LocalDateTime.now());
+        clickRepository.save(click);
+
+
         shortLink.setClickCount(shortLink.getClickCount() + 1);
         shortLinkRepository.save(shortLink);
 
         return mapToResponse(shortLink);
     }
+
+
+    public LinkStateResponse getStats(int linkId, String username) {
+
+        ShortLink shortLink = shortLinkRepository.findById(linkId)
+                .orElseThrow(() -> new RuntimeException("Link not found"));
+
+        if (!shortLink.getUser().getUsername().equals(username)) {
+            throw new RuntimeException("Not authorized");
+        }
+
+        long totalClicks = clickRepository.countByShortLink(shortLink);
+
+        LocalDateTime startOfDay = LocalDateTime.now().toLocalDate().atStartOfDay();
+
+        long clicksToday = clickRepository.countByShortLinkAndTimestampAfter(shortLink, startOfDay);
+
+        LocalDateTime lastClickAt = clickRepository
+                .findTopByShortLinkOrderByTimestampDesc(shortLink)
+                .map(Click::getTimestamp)
+                .orElse(null);
+
+        return new LinkStateResponse(totalClicks, clicksToday, lastClickAt);
+    }
+
 
     public List<ShortLinkResponse> getUserLinks(String username) {
 
