@@ -1,6 +1,7 @@
 package com.github.url_shortner.controller;
 
 import com.github.url_shortner.dto.ShortLinkResponse;
+import com.github.url_shortner.entity.ShortLink;
 import com.github.url_shortner.service.ShortLinkService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +25,13 @@ public class ShortLinkController {
         ShortLinkResponse response = shortLinkService.createShortLink(request, username);
 
         return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/delete")
+    public String deleteLink(@RequestBody String link, Authentication authentication){
+        String username = authentication.getName();
+        shortLinkService.deleteLink(link , username);
+        return "Link deleted successfully.";
     }
 
     @GetMapping("/all")

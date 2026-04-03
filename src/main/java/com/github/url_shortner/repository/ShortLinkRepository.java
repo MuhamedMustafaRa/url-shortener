@@ -16,5 +16,4 @@ public interface ShortLinkRepository extends JpaRepository<ShortLink , Integer> 
     List<ShortLink> findByUser(User user);
 
     boolean existsByShortenLink(String shortCode);
-
 }

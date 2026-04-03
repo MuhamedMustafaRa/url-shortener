@@ -8,9 +8,11 @@ import com.github.url_shortner.repository.ShortLinkRepository;
 import com.github.url_shortner.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
@@ -41,9 +43,25 @@ public class ShortLinkService {
         return mapToResponse(link);
     }
 
+    public void deleteLink(String link , String username){
+        ShortLink shortLink = shortLinkRepository.findByShortenLink(link)
+                .orElseThrow(() -> new RuntimeException("Link doesn't exists"));
+
+        if (!shortLink.getUser().getUsername().equals(username)) {
+            throw new AccessDeniedException("User can only delete his links");
+        }
+
+        shortLinkRepository.deleteById(shortLink.getId());
+
+    }
+
     public ShortLinkResponse getOriginalUrl(String shortUrl){
         ShortLink shortLink = shortLinkRepository.findByShortenLink(shortUrl)
                 .orElseThrow(() -> new RuntimeException("short link isn't exist"));
+
+        if (shortLink.getExpirationDate().isBefore(LocalDateTime.now())) {
+            throw new RuntimeException("Link expired");
+        }
 
         shortLink.setClickCount(shortLink.getClickCount() + 1);
         shortLinkRepository.save(shortLink);
