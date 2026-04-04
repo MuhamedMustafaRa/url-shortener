@@ -6,6 +6,9 @@ import com.github.url_shortner.dto.ShortLinkResponse;
 import com.github.url_shortner.entity.Click;
 import com.github.url_shortner.entity.ShortLink;
 import com.github.url_shortner.entity.User;
+import com.github.url_shortner.exception.BadRequestException;
+import com.github.url_shortner.exception.NotFoundException;
+import com.github.url_shortner.exception.UnauthorizedException;
 import com.github.url_shortner.repository.ClickRepository;
 import com.github.url_shortner.repository.ShortLinkRepository;
 import com.github.url_shortner.repository.UserRepository;
@@ -49,10 +52,10 @@ public class ShortLinkService {
 
     public void deleteLink(String link , String username){
         ShortLink shortLink = shortLinkRepository.findByShortenLink(link)
-                .orElseThrow(() -> new RuntimeException("Link doesn't exists"));
+                .orElseThrow(() -> new NotFoundException("Link doesn't exists"));
 
         if (!shortLink.getUser().getUsername().equals(username)) {
-            throw new AccessDeniedException("User can only delete his links");
+            throw new UnauthorizedException("User can only delete his links");
         }
 
         shortLinkRepository.deleteById(shortLink.getId());
@@ -61,10 +64,10 @@ public class ShortLinkService {
 
     public ShortLinkResponse getOriginalUrl(String shortUrl){
         ShortLink shortLink = shortLinkRepository.findByShortenLink(shortUrl)
-                .orElseThrow(() -> new RuntimeException("short link isn't exist"));
+                .orElseThrow(() -> new NotFoundException("short link isn't exist"));
 
         if (shortLink.getExpirationDate().isBefore(LocalDateTime.now())) {
-            throw new RuntimeException("Link expired");
+            throw new BadRequestException("Link expired");
         }
 
         Click click = new Click();
@@ -83,10 +86,10 @@ public class ShortLinkService {
     public LinkStateResponse getStats(int linkId, String username) {
 
         ShortLink shortLink = shortLinkRepository.findById(linkId)
-                .orElseThrow(() -> new RuntimeException("Link not found"));
+                .orElseThrow(() -> new NotFoundException("Link not found"));
 
         if (!shortLink.getUser().getUsername().equals(username)) {
-            throw new RuntimeException("Not authorized");
+            throw new UnauthorizedException("Not authorized");
         }
 
         long totalClicks = clickRepository.countByShortLink(shortLink);
@@ -107,7 +110,7 @@ public class ShortLinkService {
     public List<ShortLinkResponse> getUserLinks(String username) {
 
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new NotFoundException("User not found"));
 
         return shortLinkRepository.findByUser(user)
                 .stream()

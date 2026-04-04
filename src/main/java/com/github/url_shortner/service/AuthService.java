@@ -3,6 +3,7 @@ package com.github.url_shortner.service;
 import com.github.url_shortner.dto.LoginRequest;
 import com.github.url_shortner.dto.RegisterRequest;
 import com.github.url_shortner.enums.Role;
+import com.github.url_shortner.exception.BadRequestException;
 import com.github.url_shortner.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -28,10 +29,10 @@ public class AuthService {
 
     public void register(RegisterRequest request){
         if (userRepository.existsByUsername(request.getUsername())){
-            throw new RuntimeException("Username already exists");
+            throw new BadRequestException("Username already exists");
         }
         if (userRepository.existsByEmail(request.getEmail())){
-            throw new RuntimeException("Email already exists");
+            throw new BadRequestException("Email already exists");
         }
 
         User user = new User();

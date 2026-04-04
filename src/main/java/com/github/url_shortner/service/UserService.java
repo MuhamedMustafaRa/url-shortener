@@ -1,6 +1,7 @@
 package com.github.url_shortner.service;
 
 import com.github.url_shortner.entity.User;
+import com.github.url_shortner.exception.NotFoundException;
 import com.github.url_shortner.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,10 +16,10 @@ public class UserService {
 
     public User getUserByEmail(String email){
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new NotFoundException("User not found"));
     }
     public User getUserByUsername(String username){
         return userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new NotFoundException("User not found"));
     }
 }
